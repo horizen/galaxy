@@ -79,7 +79,7 @@ spec:
       hostNetwork: true
       hostPID: true
       containers:
-      - image: tkestack/galaxy:v1.0.0
+      - image: tkestack/galaxy:v1.0.7
         command: ["/bin/sh"]
       # qcloud galaxy should run with --route-eni
         args: ["-c", "cp -p /etc/galaxy/cni/00-galaxy.conf /etc/cni/net.d/; cp -p /opt/cni/galaxy/bin/galaxy-sdn /opt/cni/galaxy/bin/loopback /opt/cni/bin/; /usr/bin/galaxy --logtostderr=true --v=3 --route-eni"]
@@ -105,8 +105,6 @@ spec:
           mountPath: /var/run/galaxy/
         - name: flannel-run
           mountPath: /run/flannel
-        - name: galaxy-log
-          mountPath: /data/galaxy/logs
         - name: galaxy-etc
           mountPath: /etc/galaxy
         - name: cni-config
@@ -119,10 +117,11 @@ spec:
           mountPath: /var/lib/cni
         - name: docker-sock
           mountPath: /host/run/
+        - name: tz-config
+          mountPath: /etc/localtime
       terminationGracePeriodSeconds: 30
       tolerations:
-      - effect: NoSchedule
-        operator: Exists
+      - operator: Exists
       volumes:
       - name: galaxy-run
         hostPath:
@@ -130,8 +129,6 @@ spec:
       - name: flannel-run
         hostPath:
           path: /run/flannel
-      - name: galaxy-log
-        emptyDir: {}
       - configMap:
           defaultMode: 420
           name: galaxy-etc
@@ -153,6 +150,9 @@ spec:
         # in case of docker restart, /run/docker.sock may change, we have to mount the /run directory
         hostPath:
           path: /run/
+      - name: tz-config
+        hostPath:
+          path: /etc/localtime
 ---
 apiVersion: v1
 kind: ConfigMap
