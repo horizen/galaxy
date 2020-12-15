@@ -37,7 +37,6 @@ function build::get_basic_cni() {
   local BIN_PREFIX="galaxy"
 
   CNI_TGZ=${OUTPUT_DIR}/cni-${ARCH}.tgz
-  etho "CNI plugins path $CNI_TGZ"
   if [ ! -f ${CNI_TGZ} ]; then
     echo "Downloading ${CNI_BIN}"
     curl -L ${CNI_BIN} -o ${CNI_TGZ}
