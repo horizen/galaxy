@@ -16,8 +16,8 @@
 
 ## global scope TARGETPLATFORM
 ## ref: https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
-FROM --platform=${TARGETPLATFORM} golang:1.14.2 AS builder
-ARG TARGETPLATFORM
+FROM golang:1.14.2 AS builder
+ARG TARGETPLATFORM=amd64
 RUN echo "building for ${TARGETPLATFORM}"
 ARG WORKDIR="/go/src/tkestack.io/galaxy/"
 RUN mkdir -p ${WORKDIR}
@@ -28,14 +28,14 @@ RUN go mod download
 
 COPY . ${WORKDIR}
 RUN make build BINS="galaxy"
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 ARG OUTPUTDIR="_output/bin-${TARGETARCH}"
 RUN mv -f ${OUTPUTDIR}/* /
 WORKDIR /
 
 
 
-FROM --platform=${TARGETPLATFORM} centos:7
+FROM centos:7
 
 LABEL maintainer="louis(louisssgong@tencent.com)"
 LABEL description="This Dockerfile is written for galaxy"
