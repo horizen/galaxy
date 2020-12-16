@@ -68,6 +68,8 @@ type NetConf struct {
 	GratuitousArpRequest bool `json:"gratuitous_arp_request"`
 
 	MTU int `json:"mtu"`
+
+	Route []string `json:"route"`
 }
 
 func (d *VlanDriver) LoadConf(bytes []byte) (*NetConf, error) {

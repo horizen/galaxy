@@ -66,10 +66,11 @@ func cmdAdd(args *skel.CmdArgs) error {
 	if err := d.Init(); err != nil {
 		return fmt.Errorf("failed to setup bridge %v", err)
 	}
-	result020s, err := resultConvert(results)
+	result020s, err := resultConvert(conf, results)
 	if err != nil {
 		return err
 	}
+
 	if err := setupNetwork(result020s, vlanIds, args); err != nil {
 		return err
 	}
@@ -156,7 +157,7 @@ func setupVlanDevice(result020s []*t020.Result, vlanIds []uint16, args *skel.Cmd
 	return nil
 }
 
-func resultConvert(results []types.Result) ([]*t020.Result, error) {
+func resultConvert(conf *vlan.NetConf, results []types.Result) ([]*t020.Result, error) {
 	var result020s []*t020.Result
 	for i := 0; i < len(results); i++ {
 		result020, err := t020.GetResult(results[i])
@@ -176,6 +177,20 @@ func resultConvert(results []types.Result) ([]*t020.Result, error) {
 		routes = append(routes, types.Route{Dst: *pANet}, types.Route{Dst: *pBNet}, types.Route{Dst: *pCNet})
 		result020s[0].IP4.Routes = routes
 	}
+
+	// add route for network pre define dst route
+	if conf.Route != nil && len(conf.Route) > 0 {
+		routes := result020s[0].IP4.Routes
+		for _, dst := range conf.Route {
+			_, cidr, err := net.ParseCIDR(dst)
+			if err != nil {
+				return nil, err
+			}
+			routes = append(routes, types.Route{Dst: *cidr})
+		}
+		result020s[0].IP4.Routes = routes
+	}
+
 	return result020s, nil
 }
 
